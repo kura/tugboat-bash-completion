@@ -1,3 +1,7 @@
+=======================
+tugboat-bash-completion
+=======================
+
 It's worth noting that any command that supports a FUZZY_MATCH will take a
  small amount of time to respond, due to querying the API for a list of either
  droplets or images.
