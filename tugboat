@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# (The MIT License)
+#
+# Copyright (c) 2014 Kura
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the 'Software'), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
+_tugboat() {
+  comms="add-key authorize create destroy destroy_image droplets halt help images info info_image keys password-reset rebuild regions resize restart sizes snapshot ssh start verify version wait"
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+  case "$prev" in
+    "tugboat"|"help")
+      COMPREPLY=($(compgen -W "${comms}" -- ${cur}))
+      ;;
+    # respond with a list of droplets
+    "destroy"|"halt"|"info"|"password-reset"|"rebuild"|"resize"|"restart"|"ssh"|"start"|"wait")
+      COMPREPLY=($(compgen -W "$(_tugboat_droplets)" -- ${cur}))
+      ;;
+    # respond with a list of images. Has issues with images with spaces in the name
+    "destroy_image"|"info_image")
+      COMPREPLY=($(compgen -W "$(_tugboat_images)" -- ${cur}))
+      ;;
+  esac
+  # used if 'rebuild' or 'snapshot' has been previously sent
+  pprev="${COMP_WORDS[COMP_CWORD-2]}"
+  case "$pprev" in
+    # respond with a list of images
+    "rebuild")
+      COMPREPLY=($(compgen -W "$(_tugboat_images)" -- ${cur}))
+      ;;
+    # respond with a list of droplets
+    "snapshot")
+      COMPREPLY=($(compgen -W "$(_tugboat_droplets)" -- ${cur}))
+      ;;
+  esac
+  return 0
+}
+
+_tugboat_droplets() {
+  echo $(tugboat droplets | awk '{print $1}')
+}
+
+_tugboat_images() {
+  echo $(tugboat images | | grep --color=never -o -e "^[a-zA-Z0-9 -_]*" | grep -v "My Images")
+}
+
+complete -F _tugboat tugboat
