@@ -60,7 +60,7 @@ _tugboat_droplets() {
 }
 
 _tugboat_images() {
-  echo $(tugboat images | | grep --color=never -o -e "^[a-zA-Z0-9 -_]*" | grep -v "My Images")
+  echo $(tugboat images | awk 'NR > 1 {print $1}')
 }
 
 complete -F _tugboat tugboat
